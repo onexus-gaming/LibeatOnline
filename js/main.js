@@ -64,6 +64,11 @@ $d.onLoad(function(event) {
                 lanes.rect("fill", i*80-1, 0, 2, window.innerHeight)
             for(let i = 0; i < 6; i++)
                 lanes.image(images.receptor, i*80, window.innerHeight-40-judgeLineY+judgeLineWiggle*Math.sin(rhythm.getBeatFromTime(musicTime)*Math.PI));
+            lanes.fillStyle = RGB(255, 255, 0);
+            for(let i = 0; i < rhythm.timingSegments.length; i++) {
+                let segment = rhythm.timingSegments[i]
+                lanes.rect("fill", 0, window.innerHeight-judgeLineY-4-speed*(segment.start.time - musicTime), lanes.width, 4);
+            }
             lanes.fillStyle = RGB(128, 128, 128);
             for(let i = 0; i <= rhythm.timingSegments[rhythm.timingSegments.length - 1].end.beat; i++) {
                 lanes.rect("fill", 0, window.innerHeight-judgeLineY-4-speed*(rhythm.getTimeFromBeat(i) - musicTime), lanes.width, 4);

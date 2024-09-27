@@ -1,0 +1,28 @@
+{
+    "title": "A",
+    "titleTransliterated": "A",
+    "subtitle": "",
+    "subtitleTransliterated": "",
+    "artist": "D.J.Amuro",
+    "artistTransliterated": "D.J.Amuro",
+
+    "genre": "Renaissance",
+    "origin": "beatmania IIDX 7th style",
+
+    "tags": ["beatmaniaIIDX", "Moderate", "Energetic"],
+
+    "BPM": {
+        "0": "92.930",
+        "32": "92.960",
+        "83.5": "80.000",
+        "84": "65.000",
+        "84.5": "39.800",
+        "85": "95.500",
+        "86": "191.000"
+    },
+
+    "cover": "A.jpg",
+    "background": "A.jpg",
+
+    "charts": ["hard"]
+}
