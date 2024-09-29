@@ -71,13 +71,13 @@ $d.onLoad(function(event) {
         if(rhythm) {
             let musicTime = offset;
             let musicBeat;
+            if(musicStartTime != 0) {
+                musicTime = (performance.now() - musicStartTime)/1000 + offset;
+            }
             if(musicTime >= 0) {
                 musicBeat = rhythm.getBeatFromTime(musicTime);
             } else {
                 musicBeat = 0;
-            }
-            if(musicStartTime != 0) {
-                musicTime = (performance.now() - musicStartTime)/1000 + offset;
             }
             let camY = rhythm.getPointY(musicTime);
 
