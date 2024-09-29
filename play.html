@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>D.J.Amuro - A [Hard 38]</title>
 
-    <link rel="stylesheet" href="css/game.css">
+    <link rel="stylesheet" href="css/play.css">
 
     <script src="js/interact.js"></script>
     <script src="js/bpm.js"></script>
@@ -23,6 +23,16 @@
     </style>
 </head>
 <body>
+    <dialog>
+        <div class="songinfo">
+            <p class="title">Title</p>
+            <p class="artist">Artist</p>
+        </div>
+        <div class="progressbox">
+            <progress max="2" value="0" id="loadingprogress"></progress>
+            <button disabled id="startsong" autofocus>Start song</button>
+        </div>
+    </dialog>
     <span id="disp">mouse not found</span>
     <canvas id="lanes" width="480" height="100"></canvas>
 </body>

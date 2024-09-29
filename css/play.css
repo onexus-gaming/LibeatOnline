@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+body {
+    font-family: "Roboto", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    color: #222;
+}
+
+button {
+    font-family: "Roboto", sans-serif;
+    font-weight: 300;
+}
+
+dialog {
+    border-radius: 5px;
+    border: none;
+    width: fit-content;
+}
+
+dialog > div {
+    padding: 2%;
+    margin: 2%;
+}
+
+div.progressbox {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+button#startsong {
+    border-radius: 5px;
+    border: none;
+    background-color: #00a3ff;
+    color: white;
+    padding: 5%;
+
+    transition: 250ms linear;
+}
+
+button#startsong:hover {
+    background-color: #006199;
+
+    transition: 250ms linear;
+}
+
+p.title {
+    font-size: x-large;
+    font-weight: 600;
+    margin: 0;
+}
+p.artist {
+    font-size: medium;
+    opacity: 50%;
+    margin: 0;
+}
+
+canvas {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+}
