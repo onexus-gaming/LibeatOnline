@@ -16,6 +16,8 @@ dialog {
     border-radius: 5px;
     border: none;
     width: fit-content;
+
+    animation: pop-in 500ms ease-in-out normal forwards;
 }
 
 dialog > div {
@@ -28,6 +30,17 @@ div.progressbox {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+}
+
+@keyframes pop-in {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0%);
+        opacity: 100%;
+    }
 }
 
 button#startsong {

@@ -9,7 +9,7 @@
     "genre": "Renaissance",
     "origin": "beatmania IIDX 7th style",
 
-    "tags": ["beatmaniaIIDX", "Moderate", "Energetic"],
+    "tags": ["beatmania IIDX", "Moderate", "Energetic"],
 
     "BPM": {
         "0": "92.930",
@@ -23,6 +23,8 @@
 
     "cover": "A.jpg",
     "background": "A.jpg",
+
+    "song": "A.mp3",
 
     "charts": ["hard"]
 }

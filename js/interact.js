@@ -175,6 +175,20 @@ class $canvas {
 		this.ctx.fillStyle = style;
 	}
 
+	get strokeStyle() {
+		return this.ctx.strokeStyle;
+	}
+	set strokeStyle(style) {
+		this.ctx.strokeStyle = style;
+	}
+
+	get lineWidth() {
+		return this.ctx.lineWidth;
+	}
+	set lineWidth(width) {
+		this.ctx.lineWidth = width;
+	}
+
 	rect(mode, x, y, w, h) {
 		switch(mode) {
 			case "fill":
@@ -209,7 +223,6 @@ class $canvas {
 				break;
 		}
 	}
-
 
 	beginPath() {
 		this.ctx.beginPath();
