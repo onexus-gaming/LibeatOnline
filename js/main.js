@@ -68,7 +68,7 @@ const readyTime = 2000;
 $d.onLoad(function(event) {
     console.log("DOM loaded.");
 
-    let disp = $object.fromID("disp");
+    let fpsCounter = $object.fromID("fps");
 
     const loadingDialog = $get1("dialog");
     loadingDialog.showModal();
@@ -93,6 +93,7 @@ $d.onLoad(function(event) {
     let judgeCounts = [0, 0, 0, 0, 0, 0];
     const comboBreaks = () => judgeCounts[JUDGES.PR] + judgeCounts[JUDGES.MS];
     let combo = 0;
+    let worstJudgeSinceComboStart = JUDGES.EX;
     let score = 0;
     let maxScore = 0;
 
@@ -104,6 +105,7 @@ $d.onLoad(function(event) {
         .then((json) => {
             console.log(json), songData = json;
             music.src = `/res/songs/A/${songData.song}`;
+            $get1("body").style.backgroundImage = `url('/res/songs/A/${songData.background}')`;
         });
     let rhythm;
     let offset = -0.080;
@@ -151,12 +153,17 @@ $d.onLoad(function(event) {
         setTimeout(() => music.play(), readyTime);
     });
 
-    for(let i = 0; i < notes.length; i++) {
-        for(let j = 0; j < 1024; j += 2)
-            notes[i].push({
+    for(let i = 0; i < 1024; i++) {
+        for(let j = 0; j < 2; j++) {
+            notes[Math.round(Math.random()*2)].push({
                 type: "tap",
-                beat: j + i/6,
+                beat: i + j/2,
             });
+            notes[Math.round(Math.random()*2) + 3].push({
+                type: "tap",
+                beat: i + j/2 + 1/4,
+            });
+        }
     }
 
     function hitNote(lane) {
@@ -178,10 +185,14 @@ $d.onLoad(function(event) {
                 time: musicTime,
             };
             score += scoreValues[j];
-            if(j >= JUDGES.PR)
+            if(j >= JUDGES.PR) {
                 combo = 0;
-            else
+                worstJudgeSinceComboStart = JUDGES.EX; 
+            } else {
                 combo++;
+                if(j > worstJudgeSinceComboStart)
+                    worstJudgeSinceComboStart = j;
+            }
         }
 
         for(let i = 0; i < timingWindows.length; i++)
@@ -234,9 +245,9 @@ $d.onLoad(function(event) {
             }
             
             // RENDER
-            disp.innerText = `${1000/dt} FPS`;
-            disp.x = 0;
-            disp.y = 0;
+            fpsCounter.innerText = `${1000/dt} FPS`;
+            fpsCounter.x = 0;
+            fpsCounter.y = 0;
 
             let camY = rhythm.getPointY(musicTime);
             
@@ -307,8 +318,10 @@ $d.onLoad(function(event) {
                     fontSize += 16 * A;
                 }
                 
-                laneRender.fillStyle = RGB(255, 0, 0);
-                laneRender.print('fill', combo, laneRender.width/2, window.innerHeight/2+4*(fontSize/40), laneRender.width, `${fontSize}px Inter black`, "center", "middle");
+                let [R, G, B] = judgeColors[worstJudgeSinceComboStart];
+
+                laneRender.fillStyle = RGB(R, G, B);
+                laneRender.print('fill', combo, laneRender.width/2, window.innerHeight/2+2*(fontSize/40), laneRender.width, `${fontSize}px Inter black`, "center", "middle");
                 laneRender.fillStyle = RGB(255, 255, 255);
                 laneRender.print('fill', combo, laneRender.width/2, window.innerHeight/2, laneRender.width, `${fontSize}px Inter black`, "center", "middle");
             }
