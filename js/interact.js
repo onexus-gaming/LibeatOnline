@@ -74,6 +74,12 @@ let $keyboard = {
 	isDown: function(key) {
 		return (key in $keyboard.keys) && ($keyboard.keys[key]);
 	},
+
+	onPress: function(keyCode, handler) {
+		$d.on("keydown", function(event) {
+			if(event.code == keyCode) handler();
+		});
+	}
 };
 $d.onLoad(function() {
 	$d.on("keydown", function(event) {
@@ -215,6 +221,7 @@ class $canvas {
 		switch(mode) {
 			case "fill":
 				this.ctx.fill();
+				break;
 			case "stroke":
 				this.ctx.stroke();
 				break;
@@ -228,8 +235,8 @@ class $canvas {
 		this.ctx.beginPath();
 	}
 
-	endPath() {
-		this.ctx.endPath();
+	closePath() {
+		this.ctx.closePath();
 	}
 
 	moveTo(x, y) {
@@ -258,6 +265,25 @@ class $canvas {
 	set height(h) {
 		this.docObject.style.display = "block";
 		this.docObject.height = h;
+	}
+
+	print(mode, text, x=0, y=0, maxWidth=null, font="18px Arial", align="start", baseline="alphabetic", direction="inherit") {
+		this.ctx.font = font;
+		this.ctx.textAlign = align;
+		this.ctx.textBaseline = baseline;
+		this.ctx.direction = direction;
+
+		switch(mode) {
+			case 'fill':
+				this.ctx.fillText(text, x, y, maxWidth);
+				break;
+			case 'stroke':
+				this.ctx.strokeText(text, x, y, maxWidth);
+				break;
+			default:
+				console.error(`Unknown text drawing mode "${mode}".`);
+				break;
+		}
 	}
 }
 

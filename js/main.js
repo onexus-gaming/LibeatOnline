@@ -6,26 +6,64 @@ const images = {
     notes: [
         new Image(80, 80),
         new Image(80, 80)
+    ],
+    judge: [
+        new Image(),
+        new Image(),
+        new Image(),
+        new Image(),
+        new Image(),
+        new Image(),
     ]
 }
 images.receptor[0].src = "/res/img/note/normal/ReceptorOff.png";
 images.receptor[1].src = "/res/img/note/normal/ReceptorOn.png";
 images.notes   [0].src = "/res/img/note/normal/Note0.png";
 images.notes   [1].src = "/res/img/note/normal/Note1.png";
+images.judge   [0].src = "/res/img/judge/EXCELLENT.png";
+images.judge   [1].src = "/res/img/judge/AMAZING.png";
+images.judge   [2].src = "/res/img/judge/GREAT.png";
+images.judge   [3].src = "/res/img/judge/OKAY.png";
+images.judge   [4].src = "/res/img/judge/POOR.png";
+images.judge   [5].src = "/res/img/judge/MISS.png";
 
 const urlParams = new URLSearchParams(window.location.search);
 const song = urlParams.get("song");
 const chart = urlParams.get("chart");
 
-let noteLanes = [];
-for(let i = 0; i < 5; i++)
-    noteLanes.push({
-        notes: [],
-        next: 0,
-    });
-
 const noteHeightHalf = 40;
 const PI2 = Math.PI*2;
+
+let laneKeys = ['KeyS', 'KeyD', 'KeyF', 'KeyJ', 'KeyK', 'KeyL']; // default values, overriden by settings
+const judgeColors = [
+    [139, 255, 222],
+    [97, 178, 255],
+    [255, 194, 97],
+    [97, 255, 97],
+    [186, 97, 255],
+    [255, 97, 97],
+];
+
+const JUDGES = {
+    EX: 0,
+    AM: 1,
+    GR: 2,
+    OK: 3,
+    PR: 4,
+    MS: 5,
+}
+
+const timingWindows = [ // close to StepMania J1
+    35,
+    70,
+    105,
+    175,
+    280,
+];
+
+const scoreValues = [10, 9, 7, 5, 0, 0];
+
+const readyTime = 2000;
 
 $d.onLoad(function(event) {
     console.log("DOM loaded.");
@@ -38,15 +76,25 @@ $d.onLoad(function(event) {
     const loadingProgress = $get1("#loadingprogress");
     const startSongButton = $get1("#startsong");
 
-    let laneKeys = ['KeyS', 'KeyD', 'KeyF', 'KeyJ', 'KeyK', 'KeyL'];
-    let laneBombs = [
+    let laneBombs = [ // the cool bomb effects when you hit a note
         {time: 0, judge: undefined},
         {time: 0, judge: undefined},
         {time: 0, judge: undefined},
         {time: 0, judge: undefined},
         {time: 0, judge: undefined},
         {time: 0, judge: undefined},
-    ]; // the cool bomb effects when you hit a note
+    ];
+
+    let lastJudge = {
+        judge: undefined,
+        time: 0,
+        timing: 0,
+    };
+    let judgeCounts = [0, 0, 0, 0, 0, 0];
+    const comboBreaks = () => judgeCounts[JUDGES.PR] + judgeCounts[JUDGES.MS];
+    let combo = 0;
+    let score = 0;
+    let maxScore = 0;
 
     // creating a rhythm track with BPM changes
     let songData = {};
@@ -58,21 +106,20 @@ $d.onLoad(function(event) {
             music.src = `/res/songs/A/${songData.song}`;
         });
     let rhythm;
+    let offset = -0.080;
     let musicStartTime = 0;
+    let musicTime = musicStartTime;
+
     let notes = [
-        [{beat: 0, type: "tap"}, {beat: 0.25, type: "tap"}, {beat: 0.5, type: "tap"}, {beat: 0.75, type: "tap"}],
-        [{beat: 1, type: "tap"}],
-        [{beat: 2, type: "tap"}],
-        [{beat: 3, type: "tap"}],
-        [{beat: 4, type: "tap"}],
-        [{beat: 5, type: "tap"}],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
     ]
     let nextNote = [0, 0, 0, 0, 0, 0];
 
-    for(let i = 0; i < notes.length; i++) {
-        for(let j = 0; j < 1024; j += 2)
-            notes[i].push({beat: j + Math.random() * 2, type: "tap"})
-    }
     music.addEventListener("canplaythrough", function(event) {
         loadingProgress.value = 1;
         startSongButton.disabled = false;
@@ -89,6 +136,7 @@ $d.onLoad(function(event) {
         for(let i = 0; i < notes.length; i++) {
             for(let note of notes[i]) {
                 note.time = rhythm.getTimeFromBeat(note.beat);
+                maxScore += scoreValues[JUDGES.EX];
             }
         }
 
@@ -99,9 +147,55 @@ $d.onLoad(function(event) {
     
     startSongButton.addEventListener('click', function(event) {
         loadingDialog.close();
-        musicStartTime = performance.now();
-        music.play();
+        musicStartTime = performance.now() + readyTime;
+        setTimeout(() => music.play(), readyTime);
     });
+
+    for(let i = 0; i < notes.length; i++) {
+        for(let j = 0; j < 1024; j += 2)
+            notes[i].push({
+                type: "tap",
+                beat: j + i/6,
+            });
+    }
+
+    function hitNote(lane) {
+        const note = notes[lane][nextNote[lane]];
+        // < 0 if early, > 0 if late, 0 if neither
+        const noteJudgeTime = (musicTime - note.time)*1000;
+        const noteJudgeTimeAbs = Math.abs(noteJudgeTime);
+
+        function register(j) {
+            nextNote[lane]++;
+            lastJudge = {
+                judge: j,
+                time: musicTime,
+                timing: noteJudgeTime
+            };
+            judgeCounts[j]++;
+            laneBombs[lane] = {
+                judge: j,
+                time: musicTime,
+            };
+            score += scoreValues[j];
+            if(j >= JUDGES.PR)
+                combo = 0;
+            else
+                combo++;
+        }
+
+        for(let i = 0; i < timingWindows.length; i++)
+            if(noteJudgeTimeAbs <= timingWindows[i]) { // player has hit the note
+                register(i);
+                break;
+            }
+
+        if(noteJudgeTime > timingWindows[JUDGES.PR]) register(JUDGES.MS);
+    }
+
+    // registering judge mechanisms
+    for(let i = 0; i < laneKeys.length; i++)
+        $keyboard.onPress(laneKeys[i], () => hitNote(i));
 
     let laneRender = $canvas.fromID("lanes");
 
@@ -110,17 +204,18 @@ $d.onLoad(function(event) {
     }
     window.addEventListener("resize", resizeCanvas);
 
-    let judgeLineY = 100;
-    let judgeLineWiggle = 2;
-    let speed = 1500;
-    let offset = -0.080;
+    // VISUAL CONSTANTS
+    const judgeLineY = 100;
+    const judgeLineWiggle = 2;
+    const speed = 1500;
     
+    // UPDATE LOOP
     let updateLoop = $update.add(function(dt) {
         let visualJudgeLineY = window.innerHeight - judgeLineY;
         let noteCenterJudgeLineY = visualJudgeLineY - noteHeightHalf;
         if(rhythm) {
             // GAME LOOP
-            let musicTime = offset;
+            musicTime = offset - readyTime;
             let musicBeat;
             if(musicStartTime != 0) {
                 musicTime = (performance.now() - musicStartTime)/1000 + offset;
@@ -130,14 +225,21 @@ $d.onLoad(function(event) {
             } else {
                 musicBeat = 0;
             }
-            let camY = rhythm.getPointY(musicTime);
 
+            // notes cleanup
+            for(let i = 0; i < notes.length; i++) { // lane
+                const note = notes[i][nextNote[i]];
+                if((note.time - musicTime)*1000 < -timingWindows[JUDGES.PR])
+                    hitNote(i);
+            }
+            
+            // RENDER
             disp.innerText = `${1000/dt} FPS`;
             disp.x = 0;
             disp.y = 0;
 
-
-            // RENDER
+            let camY = rhythm.getPointY(musicTime);
+            
             laneRender.clear();
             laneRender.fillStyle = RGB(0, 0, 0);
             laneRender.rect("fill", 0, 0, laneRender.width, window.innerHeight);
@@ -151,7 +253,7 @@ $d.onLoad(function(event) {
             laneRender.rect("fill", 0, window.innerHeight-judgeLineY, laneRender.width, 1);
             for(let i = 0; i < 6; i++) {
                 let image = 0;
-                if($keyboard.isDown(laneKeys[i])) {image = 1; laneBombs[i].time = musicTime};
+                if($keyboard.isDown(laneKeys[i])) image = 1; //laneBombs[i] = {judge: Math.round(Math.random()*5), time: musicTime}
                 laneRender.image(images.receptor[image], i*100 + 10, noteCenterJudgeLineY + judgeLineWiggle*Math.sin(musicBeat*Math.PI));
             }
 
@@ -185,13 +287,41 @@ $d.onLoad(function(event) {
             // bombs
             for(let i = 0; i < laneBombs.length; i++) {
                 let bomb = laneBombs[i];
-                if(musicTime - bomb.time < 0.2) {
-                    let W = Math.min((1-(musicTime - bomb.time)*5), 1)**2;
-                    laneRender.lineWidth = 40*W;
+                if(musicTime - bomb.time < 0.2 && bomb.judge !== undefined && bomb.judge < JUDGES.MS) {
+                    let A = Math.min((1-(musicTime - bomb.time)*5), 1)**2;
+                    let [R, G, B] = judgeColors[bomb.judge];
+                    laneRender.lineWidth = 40*A;
                     laneRender.beginPath();
-                    laneRender.strokeStyle = RGBA(255, 255, 255, W);
-                    laneRender.arc('stroke', i*100 + 10 + noteHeightHalf, visualJudgeLineY, noteHeightHalf - 20*W + 10*(1-W), 0, PI2, false);
+                    laneRender.strokeStyle = RGBA(R, G, B, A);
+                    laneRender.arc('stroke', i*100 + 10 + noteHeightHalf, visualJudgeLineY, noteHeightHalf - 20*A + 10*(1-A), 0, PI2, false);
+                    laneRender.closePath();
                 }
+            }
+
+            // UI
+            // combo
+            if(combo > 0) {
+                let fontSize = 40;
+                if(musicTime - lastJudge.time < 0.2) {
+                    let A = Math.min((1-(musicTime - lastJudge.time)*5), 1)**2;
+                    fontSize += 16 * A;
+                }
+                
+                laneRender.fillStyle = RGB(255, 0, 0);
+                laneRender.print('fill', combo, laneRender.width/2, window.innerHeight/2+4*(fontSize/40), laneRender.width, `${fontSize}px Inter black`, "center", "middle");
+                laneRender.fillStyle = RGB(255, 255, 255);
+                laneRender.print('fill', combo, laneRender.width/2, window.innerHeight/2, laneRender.width, `${fontSize}px Inter black`, "center", "middle");
+            }
+
+            // last judge
+            if(lastJudge.judge !== undefined && musicTime - lastJudge.time < 1) {
+                const image = images.judge[lastJudge.judge];
+                let offset = 0;
+                if(musicTime - lastJudge.time < 0.2) {
+                    let A = Math.min((1-(musicTime - lastJudge.time)*5), 1)**2;
+                    offset = 8 * A;
+                }
+                laneRender.image(image, laneRender.width/2-image.width/2, window.innerHeight/2-image.height/2-40-offset);
             }
         }
     });
