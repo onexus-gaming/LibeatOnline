@@ -111,6 +111,7 @@ $d.onLoad(function(event) {
     let offset = -0.080;
     let musicStartTime = 0;
     let musicTime = musicStartTime;
+    let musicBeat = musicTime;
 
     let notes = [
         [],
@@ -154,16 +155,14 @@ $d.onLoad(function(event) {
     });
 
     for(let i = 0; i < 1024; i++) {
-        for(let j = 0; j < 2; j++) {
-            notes[Math.round(Math.random()*2)].push({
-                type: "tap",
-                beat: i + j/2,
-            });
-            notes[Math.round(Math.random()*2) + 3].push({
-                type: "tap",
-                beat: i + j/2 + 1/4,
-            });
-        }
+        notes[Math.round(Math.random()*2)].push({
+            type: "tap",
+            beat: i,
+        });
+        notes[Math.round(Math.random()*2) + 3].push({
+            type: "tap",
+            beat: i + 1/2,
+        });
     }
 
     function hitNote(lane) {
@@ -218,7 +217,9 @@ $d.onLoad(function(event) {
     // VISUAL CONSTANTS
     const judgeLineY = 100;
     const judgeLineWiggle = 2;
-    const speed = 1500;
+    const speed = 1500/4; // px/sec | px/beat
+    const speedMode = 'beat'; // sec | beat
+    const getDY = (time) => speed*((speedMode === 'sec') ? (time - musicTime) : (rhythm.getBeatFromTime(time) - musicBeat))
     
     // UPDATE LOOP
     let updateLoop = $update.add(function(dt) {
@@ -227,15 +228,18 @@ $d.onLoad(function(event) {
         if(rhythm) {
             // GAME LOOP
             musicTime = offset - readyTime;
-            let musicBeat;
             if(musicStartTime != 0) {
                 musicTime = (performance.now() - musicStartTime)/1000 + offset;
             }
             if(musicTime >= 0) {
                 musicBeat = rhythm.getBeatFromTime(musicTime);
             } else {
-                musicBeat = 0;
+                musicBeat = rhythm.timingSegments[0].BPS*musicTime;
             }
+
+            //console.log(musicBeat);
+
+            //console.log(getDY(musicTime-1))
 
             // notes cleanup
             for(let i = 0; i < notes.length; i++) { // lane
@@ -272,21 +276,21 @@ $d.onLoad(function(event) {
             laneRender.fillStyle = RGB(255, 255, 0);
             for(let i = 1; i < rhythm.timingSegments.length; i++) {
                 let segment = rhythm.timingSegments[i];
-                laneRender.rect("fill", 0, visualJudgeLineY - 2 - speed*(segment.start.time - musicTime), laneRender.width, 4);
+                laneRender.rect("fill", 0, visualJudgeLineY - 2 - getDY(segment.start.time), laneRender.width, 4);
             }
 
             // beat line
             for(let i = 0; i <= rhythm.timingSegments[rhythm.timingSegments.length - 1].end.beat; i++) {
                 let approach = Math.max((musicBeat - i)/2 + 1, 0);
                 laneRender.fillStyle = RGBA(128, 128, 128, approach);
-                laneRender.rect("fill", 0, visualJudgeLineY - 1 - speed*(rhythm.getTimeFromBeat(i) - musicTime), laneRender.width, 2);
+                laneRender.rect("fill", 0, visualJudgeLineY - 1 - getDY(rhythm.getTimeFromBeat(i)), laneRender.width, 2);
             }
 
             // notes
             for(let i = 0; i < notes.length; i++) {
                 for(let j = 0; j < notes[i].length; j++) {
                     let note = notes[i][j];
-                    let y = speed*(note.time - musicTime);
+                    let y = getDY(note.time);
                     if(y > window.innerHeight) continue;
                     //if(y < 0) y/=10;
                     let clr = (i < 3 ? i : i+1)%2;

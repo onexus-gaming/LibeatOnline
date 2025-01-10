@@ -1,9 +1,9 @@
 function isBeatInSegment(beat, segment) {
-    return (segment.start.beat <= beat) && (beat < segment.end.beat);
+    return (segment.start.beat <= beat) && (beat <= segment.end.beat);
 }
 
 function isTimeInSegment(time, segment) {
-    return (segment.start.time <= time) && (time < segment.end.time);
+    return (segment.start.time <= time) && (time <= segment.end.time);
 }
 
 class RhythmTracker {
@@ -69,6 +69,8 @@ class RhythmTracker {
     }
 
     getBeatFromTime(time) {
+        if(time < 0) return time*this.timingSegments[0].BPS
+
         for(let i = 0; i < this.timingSegments.length; i++) {
             let segment = this.timingSegments[i];
             //console.log(segment.BPM, isTimeInSegment(time, segment));
@@ -111,7 +113,6 @@ class RhythmTracker {
                 let gainedYInSegment = elapsedTimeInSegment*segment.speed;
             
                 return baseY + gainedYInSegment;
-                break;
             }
         }
     }
