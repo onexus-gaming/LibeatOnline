@@ -1,0 +1,33 @@
+{
+    "title": "CHAOS (Terror-Tech Mix)",
+    "titleTransliterated": "CHAOS (Terror-Tech Mix)",
+    "subtitle": "GIMMICKS",
+    "subtitleTransliterated": "GIMMICKS",
+    "artist": "ARM (IOSYS)",
+    "artistTransliterated": "ARM (IOSYS)",
+
+    "genre": "Game Music",
+    "origin": "DanceDanceRevolution A",
+
+    "tags": ["DanceDanceRevolution", "Hard", "Energetic", "Heavy", "Gimmicks"],
+
+    "BPM": {
+        "0": 165,
+        "4": 82.5,
+        "24": 165,
+        "112": 82.5,
+        "116": 165,
+        "172": 82.5,
+        "176": 330,
+        "240": 165
+    },
+
+    "offset": -0.005,
+
+    "cover": "A.jpg",
+    "background": "A.jpg",
+
+    "song": "CHAOSTerror-TechMix.ogg",
+
+    "charts": ["hard"]
+}

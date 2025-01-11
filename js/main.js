@@ -32,7 +32,8 @@ const song = urlParams.get("song");
 const chart = urlParams.get("chart");
 
 const noteHeightHalf = 40;
-const PI2 = Math.PI*2;
+const PI200 = Math.PI*2;
+const PI50 = Math.PI/2;
 
 let laneKeys = ['KeyS', 'KeyD', 'KeyF', 'KeyJ', 'KeyK', 'KeyL']; // default values, overriden by settings
 const judgeColors = [
@@ -100,15 +101,23 @@ $d.onLoad(function(event) {
     // creating a rhythm track with BPM changes
     let songData = {};
     let music = new Audio();
-    fetch('res/songs/A/meta.json')
+    let offset = -0.080;
+    fetch(`/res/songs/${song}/meta.json`)
         .then((response) => response.json())
         .then((json) => {
-            console.log(json), songData = json;
-            music.src = `/res/songs/A/${songData.song}`;
-            $get1("body").style.backgroundImage = `url('/res/songs/A/${songData.background}')`;
+            loadingProgress.value = 1;
+
+            console.log(json);
+            songData = json;
+
+            document.title = `${songData.artist} - ${songData.title}` + (songData.subtitle !== '' ?  ` (${songData.subtitle})` : '')
+
+            music.src = `/res/songs/${song}/${songData.song}`;
+            $get1("body").style.backgroundImage = `url('/res/songs/${song}/${songData.background}')`;
+
+            offset = songData.offset;
         });
     let rhythm;
-    let offset = -0.080;
     let musicStartTime = 0;
     let musicTime = musicStartTime;
     let musicBeat = musicTime;
@@ -124,16 +133,25 @@ $d.onLoad(function(event) {
     let nextNote = [0, 0, 0, 0, 0, 0];
 
     music.addEventListener("canplaythrough", function(event) {
-        loadingProgress.value = 1;
+        loadingProgress.value = 2;
         startSongButton.disabled = false;
 
-        rhythm = new RhythmTracker(music.duration, 92.930);
-        rhythm.changeBPM(32, 92.960);
+        rhythm = new RhythmTracker(music.duration, songData.BPM["0"]);
+        const sortedKeys = Object.keys(songData.BPM).sort((a, b) => parseFloat(a) > parseFloat(b));
+        for(const key of sortedKeys) {
+            if(key === 0) continue;
+            const value = songData.BPM[key];
+            console.log(key, value);
+            const beat = parseFloat(key);
+            rhythm.changeBPM(beat, value);
+        }
+        console.log(rhythm.timingSegments)
+        /* rhythm.changeBPM(32, 92.960);
         rhythm.changeBPM(83.5, 80.000);
         rhythm.changeBPM(84, 65.000);
         rhythm.changeBPM(84.5, 39.800);
         rhythm.changeBPM(85, 95.500);
-        rhythm.changeBPM(86, 191.000);
+        rhythm.changeBPM(86, 191.000); */
         rhythm.changeScroll(1, 2);
 
         for(let i = 0; i < notes.length; i++) {
@@ -217,8 +235,8 @@ $d.onLoad(function(event) {
     // VISUAL CONSTANTS
     const judgeLineY = 100;
     const judgeLineWiggle = 2;
-    const speed = 1500/4; // px/sec | px/beat
-    const speedMode = 'beat'; // sec | beat
+    const speed = 2000; // px/sec | px/beat
+    const speedMode = 'sec'; // sec | beat
     const getDY = (time) => speed*((speedMode === 'sec') ? (time - musicTime) : (rhythm.getBeatFromTime(time) - musicBeat))
     
     // UPDATE LOOP
@@ -264,8 +282,6 @@ $d.onLoad(function(event) {
             for(let i = 1; i < 6; i++)
                 laneRender.rect("fill", i*100-1, 0, 2, window.innerHeight)
             // receptors
-            laneRender.fillStyle = RGB(255, 0, 0);
-            laneRender.rect("fill", 0, window.innerHeight-judgeLineY, laneRender.width, 1);
             for(let i = 0; i < 6; i++) {
                 let image = 0;
                 if($keyboard.isDown(laneKeys[i])) image = 1; //laneBombs[i] = {judge: Math.round(Math.random()*5), time: musicTime}
@@ -308,7 +324,7 @@ $d.onLoad(function(event) {
                     laneRender.lineWidth = 40*A;
                     laneRender.beginPath();
                     laneRender.strokeStyle = RGBA(R, G, B, A);
-                    laneRender.arc('stroke', i*100 + 10 + noteHeightHalf, visualJudgeLineY, noteHeightHalf - 20*A + 10*(1-A), 0, PI2, false);
+                    laneRender.arc('stroke', i*100 + 10 + noteHeightHalf, visualJudgeLineY, noteHeightHalf - 20*A + 10*(1-A), 0, PI200, false);
                     laneRender.closePath();
                 }
             }
@@ -322,7 +338,7 @@ $d.onLoad(function(event) {
                     fontSize += 16 * A;
                 }
                 
-                let [R, G, B] = judgeColors[worstJudgeSinceComboStart];
+                const [R, G, B] = judgeColors[worstJudgeSinceComboStart];
 
                 laneRender.fillStyle = RGB(R, G, B);
                 laneRender.print('fill', combo, laneRender.width/2, window.innerHeight/2+2*(fontSize/40), laneRender.width, `${fontSize}px Inter black`, "center", "middle");
@@ -333,12 +349,30 @@ $d.onLoad(function(event) {
             // last judge
             if(lastJudge.judge !== undefined && musicTime - lastJudge.time < 1) {
                 const image = images.judge[lastJudge.judge];
-                let offset = 0;
+
+                let judgeOffset = 0;
                 if(musicTime - lastJudge.time < 0.2) {
-                    let A = Math.min((1-(musicTime - lastJudge.time)*5), 1)**2;
-                    offset = 8 * A;
+                    const A = Math.min((1-(musicTime - lastJudge.time)*5), 1)**2;
+                    judgeOffset = 8 * A;
                 }
-                laneRender.image(image, laneRender.width/2-image.width/2, window.innerHeight/2-image.height/2-40-offset);
+
+                laneRender.image(image, laneRender.width/2-image.width/2, window.innerHeight/2-image.height/2-40-judgeOffset)
+            }
+
+            // timing bar
+            laneRender.fillStyle = RGBA(256, 256, 256, 0.5)
+            laneRender.rect('fill', laneRender.width/2-117, window.innerHeight/2 + 66, 234, 1)
+            for(let i = 0; i < timingWindows.length; i++) {
+                const timingWindow = timingWindows[i];
+                const [R, G, B] = judgeColors[i];
+                laneRender.fillStyle = RGB(R, G, B);
+                laneRender.rect('fill', laneRender.width/2+117*(timingWindow/timingWindows[JUDGES.PR]), window.innerHeight/2 + 61, 1, 5)
+                laneRender.rect('fill', laneRender.width/2-117*(timingWindow/timingWindows[JUDGES.PR]), window.innerHeight/2 + 61, 1, 5)
+            }
+            if(lastJudge.judge !== undefined) {
+                const [R, G, B] = judgeColors[lastJudge.judge];
+                laneRender.fillStyle = RGB(R, G, B);
+                laneRender.rect('fill', laneRender.width/2, window.innerHeight/2 + 56, 117*(lastJudge.timing/timingWindows[JUDGES.PR]), 10)
             }
         }
     });
