@@ -71,11 +71,13 @@ $d.onLoad(function(event) {
 
     let fpsCounter = $object.fromID("fps");
 
-    const loadingDialog = $get1("dialog");
+    const loadingDialog = $get1("dialog#songdialog");
     loadingDialog.showModal();
 
     const loadingProgress = $get1("#loadingprogress");
     const startSongButton = $get1("#startsong");
+
+    const scoreDisplay = $get1("#score");
 
     let laneBombs = [ // the cool bomb effects when you hit a note
         {time: 0, judge: undefined},
@@ -160,6 +162,7 @@ $d.onLoad(function(event) {
                 maxScore += scoreValues[JUDGES.EX];
             }
         }
+        console.log('mxsc', (notes[0].length + notes[1].length + notes[2].length + notes[3].length + notes[4].length + notes[5].length)*10, maxScore)
 
         loadingProgress.value = 2;
         //for(let i = 0; i <= rhythm.timingSegments[rhythm.timingSegments.length - 1].end.beat; i++)
@@ -172,7 +175,7 @@ $d.onLoad(function(event) {
         setTimeout(() => music.play(), readyTime);
     });
 
-    for(let i = 0; i < 1024; i++) {
+    for(let i = 0; i < 302.1060898905913; i++) {
         notes[Math.round(Math.random()*2)].push({
             type: "tap",
             beat: i,
@@ -185,6 +188,7 @@ $d.onLoad(function(event) {
 
     function hitNote(lane) {
         const note = notes[lane][nextNote[lane]];
+        if(note === undefined) return;
         // < 0 if early, > 0 if late, 0 if neither
         const noteJudgeTime = (musicTime - note.time)*1000;
         const noteJudgeTimeAbs = Math.abs(noteJudgeTime);
@@ -219,6 +223,9 @@ $d.onLoad(function(event) {
             }
 
         if(noteJudgeTime > timingWindows[JUDGES.PR]) register(JUDGES.MS);
+
+        // update score display
+        scoreDisplay.innerText = `${(score/maxScore*100).toFixed(3)}%`
     }
 
     // registering judge mechanisms
@@ -262,6 +269,7 @@ $d.onLoad(function(event) {
             // notes cleanup
             for(let i = 0; i < notes.length; i++) { // lane
                 const note = notes[i][nextNote[i]];
+                if(note === undefined) break;
                 if((note.time - musicTime)*1000 < -timingWindows[JUDGES.PR])
                     hitNote(i);
             }

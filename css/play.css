@@ -87,6 +87,23 @@ p.artist {
     margin: 0;
 }
 
+#scoretracker {
+    background-color: #00000080;
+    color: white;
+    border-radius: 8px;
+    padding: 8px;
+    outline: 1px solid white;
+
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center; /* vertical */
+
+    position: absolute;
+    left: 32px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
 canvas {
     position: absolute;
     top: 0;
