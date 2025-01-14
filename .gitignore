@@ -3,3 +3,5 @@
 
 # only for instances of the game
 res/songs/database.json
+
+*.sm

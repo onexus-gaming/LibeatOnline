@@ -144,12 +144,12 @@ $d.onLoad(function(event) {
     fetch(`/res/songs/${song}/${chart}.libeat`)
         .then((response) => response.text())
         .then((text) => {
-            const lines = text.split('\n');
+            const lines = text.trim().split('\n');
 
             for(const line of lines) {
                 const commands = line.split(';');
                 const timeCommand = commands[0].split(' ');
-                const beat = parseInt(timeCommand[0])*4 + parseInt(timeCommand[1])/parseInt(timeCommand[2]);
+                const beat = (parseFloat(timeCommand[0]) + parseFloat(timeCommand[1])/parseFloat(timeCommand[2]))*4;
 
                 for(let i = 1; i < commands.length; i++) {
                     const splitCommand = commands[i].trim().split(' ');
@@ -158,6 +158,8 @@ $d.onLoad(function(event) {
                             notes[parseInt(splitCommand[1])].push({type: 'tap', beat: beat});
                 }
             }
+
+            console.log(notes);
         })
 
     music.addEventListener("canplaythrough", function(event) {

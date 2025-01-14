@@ -1,0 +1,28 @@
+{
+    "title": "quasar",
+    "titleTransliterated": "quasarA",
+    "subtitle": "",
+    "subtitleTransliterated": "",
+    "artist": "OutPhase",
+    "artistTransliterated": "OutPhase",
+
+    "genre": "Trance",
+    "origin": "beatmania IIDX 9th style",
+
+    "tags": ["beatmania IIDX", "Hard", "Energetic"],
+
+    "BPM": {
+        "0": "155"
+    },
+
+    "offset": -0.838,
+
+    "cover": "A.jpg",
+    "background": "A.jpg",
+
+    "song": "quasar.mp3",
+
+    "charts": {
+        "hard": 30
+    }
+}
