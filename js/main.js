@@ -386,7 +386,7 @@ $d.onLoad(function(event) {
                 const [R, G, B] = judgeColors[worstJudgeSinceComboStart];
 
                 laneRender.fillStyle = RGB(R, G, B);
-                laneRender.print('fill', combo, laneRender.width/2, window.innerHeight/2+4*(fontSize/40), laneRender.width, `${fontSize}px Inter black`, "center", "middle");
+                laneRender.print('fill', combo, laneRender.width/2, window.innerHeight/2+2*(fontSize/40), laneRender.width, `${fontSize}px Inter black`, "center", "middle");
                 laneRender.fillStyle = RGB(255, 255, 255);
                 laneRender.print('fill', combo, laneRender.width/2, window.innerHeight/2, laneRender.width, `${fontSize}px Inter black`, "center", "middle");
             }
