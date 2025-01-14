@@ -24,7 +24,7 @@ button {
     color: red;
 }
 
-dialog {
+dialog#songdialog {
     border-radius: 5px;
     border: none;
     width: fit-content;
@@ -63,6 +63,11 @@ div.progressbox {
 button#startsong {
     border-radius: 5px;
     border: none;
+
+    font-family: Inter;
+    font-size: 1.2em;
+    font-weight: bold;
+
     background-color: #00a3ff;
     color: white;
     padding: 5%;

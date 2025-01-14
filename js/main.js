@@ -79,7 +79,6 @@ $d.onLoad(function(event) {
     let fpsCounter = $object.fromID("fps");
 
     const loadingDialog = $get1("dialog#songdialog");
-    loadingDialog.showModal();
 
     const loadingProgress = $get1("#loadingprogress");
     const startSongButton = $get1("#startsong");
@@ -125,6 +124,11 @@ $d.onLoad(function(event) {
             $get1("body").style.backgroundImage = `url('/res/songs/${song}/${songData.background}')`;
 
             offset = songData.offset;
+
+            $get1('.title').innerText = songData.title;
+            $get1('.artist').innerText = songData.artist;
+
+            loadingDialog.showModal();
         });
     let rhythm;
     let musicStartTime = 0;
