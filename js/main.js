@@ -107,10 +107,10 @@ $d.onLoad(function(event) {
     let score = 0;
     let maxScore = 0;
 
-    // creating a rhythm track with BPM changes
+    // loading the song
     let songData = {};
     let music = new Audio();
-    let offset = -0.080;
+    let offset = 0; // redefined later
     fetch(`/res/songs/${song}/meta.json`)
         .then((response) => response.json())
         .then((json) => {
@@ -140,11 +140,31 @@ $d.onLoad(function(event) {
         [],
     ]
     let nextNote = [0, 0, 0, 0, 0, 0];
+    // parsing note events
+    fetch(`/res/songs/${song}/${chart}.libeat`)
+        .then((response) => response.text())
+        .then((text) => {
+            const lines = text.split('\n');
+
+            for(const line of lines) {
+                const commands = line.split(';');
+                const timeCommand = commands[0].split(' ');
+                const beat = parseInt(timeCommand[0])*4 + parseInt(timeCommand[1])/parseInt(timeCommand[2]);
+
+                for(let i = 1; i < commands.length; i++) {
+                    const splitCommand = commands[i].trim().split(' ');
+                    if(splitCommand[0] === 'note')
+                        if(splitCommand[2] === 'tap')
+                            notes[parseInt(splitCommand[1])].push({type: 'tap', beat: beat});
+                }
+            }
+        })
 
     music.addEventListener("canplaythrough", function(event) {
         loadingProgress.value = 2;
         startSongButton.disabled = false;
 
+        // creating a rhythm track with BPM changes
         rhythm = new RhythmTracker(music.duration, songData.BPM["0"]);
         const sortedKeys = Object.keys(songData.BPM).sort((a, b) => parseFloat(a) > parseFloat(b));
         for(const key of sortedKeys) {
@@ -169,7 +189,7 @@ $d.onLoad(function(event) {
                 maxScore += scoreValues[JUDGES.EX];
             }
         }
-        console.log('mxsc', (notes[0].length + notes[1].length + notes[2].length + notes[3].length + notes[4].length + notes[5].length)*10, maxScore)
+        //console.log('mxsc', (notes[0].length + notes[1].length + notes[2].length + notes[3].length + notes[4].length + notes[5].length)*10, maxScore)
 
         loadingProgress.value = 2;
         //for(let i = 0; i <= rhythm.timingSegments[rhythm.timingSegments.length - 1].end.beat; i++)
@@ -182,7 +202,7 @@ $d.onLoad(function(event) {
         setTimeout(() => music.play(), readyTime);
     });
 
-    for(let i = 0; i < 302.1060898905913; i++) {
+    /* for(let i = 0; i < 302.1060898905913; i++) {
         notes[Math.round(Math.random()*2)].push({
             type: "tap",
             beat: i,
@@ -191,7 +211,7 @@ $d.onLoad(function(event) {
             type: "tap",
             beat: i + 1/2,
         });
-    }
+    } */
 
     function hitNote(lane) {
         const note = notes[lane][nextNote[lane]];
@@ -241,12 +261,12 @@ $d.onLoad(function(event) {
     for(let i = 0; i < laneKeys.length; i++)
         $keyboard.onPress(laneKeys[i], () => hitNote(i));
 
-    let laneRender = $canvas.fromID("lanes");
+    let laneRender = $canvas.fromID('lanes');
 
     function resizeCanvas() {
         laneRender.height = window.innerHeight;
     }
-    window.addEventListener("resize", resizeCanvas);
+    window.addEventListener('resize', resizeCanvas);
 
     // VISUAL CONSTANTS
     const judgeLineY = 100;
