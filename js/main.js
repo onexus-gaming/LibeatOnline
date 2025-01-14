@@ -84,6 +84,7 @@ $d.onLoad(function(event) {
     const startSongButton = $get1("#startsong");
 
     const scoreDisplay = $get1("#score");
+    const absScoreDisplay = $get1("#absscore");
 
     let laneBombs = [ // the cool bomb effects when you hit a note
         {time: 0, judge: undefined},
@@ -261,6 +262,7 @@ $d.onLoad(function(event) {
 
         // update score display
         scoreDisplay.innerText = `${(score/maxScore*100).toFixed(3)}%`
+        absScoreDisplay.innerText = (score/maxScore*songData.charts[chart]).toFixed(3)
     }
 
     // registering judge mechanisms
@@ -384,7 +386,7 @@ $d.onLoad(function(event) {
                 const [R, G, B] = judgeColors[worstJudgeSinceComboStart];
 
                 laneRender.fillStyle = RGB(R, G, B);
-                laneRender.print('fill', combo, laneRender.width/2, window.innerHeight/2+2*(fontSize/40), laneRender.width, `${fontSize}px Inter black`, "center", "middle");
+                laneRender.print('fill', combo, laneRender.width/2, window.innerHeight/2+4*(fontSize/40), laneRender.width, `${fontSize}px Inter black`, "center", "middle");
                 laneRender.fillStyle = RGB(255, 255, 255);
                 laneRender.print('fill', combo, laneRender.width/2, window.innerHeight/2, laneRender.width, `${fontSize}px Inter black`, "center", "middle");
             }

@@ -121,6 +121,14 @@ p.artist {
     text-align: center;
 }
 
+#absscore {
+    margin: 0px;
+
+    font-size: 1em;
+    font-weight: light;
+    text-align: center;
+}
+
 #judgetracker thead tr th {
     border-bottom: 1px solid white;
 }
