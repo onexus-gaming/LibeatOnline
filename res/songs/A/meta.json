@@ -28,5 +28,7 @@
 
     "song": "A.mp3",
 
-    "charts": ["hard"]
+    "charts": {
+        "hard": 38
+    }
 }

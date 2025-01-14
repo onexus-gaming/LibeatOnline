@@ -1,3 +1,10 @@
+Object.defineProperty(String.prototype, 'capitalize', {
+    value: function() {
+        return this.charAt(0).toUpperCase() + this.slice(1);
+    },
+    enumerable: false
+});
+
 const images = {
     receptor: [
         new Image(80, 80),
@@ -112,7 +119,7 @@ $d.onLoad(function(event) {
             console.log(json);
             songData = json;
 
-            document.title = `${songData.artist} - ${songData.title}` + (songData.subtitle !== '' ?  ` (${songData.subtitle})` : '')
+            document.title = `${songData.artist} - ${songData.title}` + (songData.subtitle !== '' ?  ` (${songData.subtitle})` : '') + ` (${chart.capitalize()} ${songData.charts[chart]})`
 
             music.src = `/res/songs/${song}/${songData.song}`;
             $get1("body").style.backgroundImage = `url('/res/songs/${song}/${songData.background}')`;
@@ -214,6 +221,8 @@ $d.onLoad(function(event) {
                 if(j > worstJudgeSinceComboStart)
                     worstJudgeSinceComboStart = j;
             }
+
+            $get1(`#judgetracker${j}`).innerText = judgeCounts[j];
         }
 
         for(let i = 0; i < timingWindows.length; i++)

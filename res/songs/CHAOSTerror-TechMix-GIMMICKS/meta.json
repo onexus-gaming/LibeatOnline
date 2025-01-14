@@ -29,5 +29,7 @@
 
     "song": "CHAOSTerror-TechMix.ogg",
 
-    "charts": ["hard"]
+    "charts": {
+        "hard": 35
+    }
 }

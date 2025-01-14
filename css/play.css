@@ -5,10 +5,10 @@ body {
     margin: 0;
     padding: 0;
 
-
     font-family: "Roboto", sans-serif;
     font-weight: 400;
     font-style: normal;
+    font-size: 1em;
     color: #222;
 
     background-position: center top;
@@ -94,6 +94,8 @@ p.artist {
     padding: 8px;
     outline: 1px solid white;
 
+    font-family: Inter;
+
     display: inline-flex;
     flex-direction: column;
     align-items: center; /* vertical */
@@ -102,6 +104,32 @@ p.artist {
     left: 32px;
     top: 50%;
     transform: translateY(-50%);
+
+    min-width: 200px;
+}
+
+#score {
+    margin: 0px;
+
+    font-size: 2em;
+    font-weight: bold;
+    text-align: center;
+}
+
+#judgetracker thead tr th {
+    border-bottom: 1px solid white;
+}
+
+#judgetracker img {
+    height: 1em;
+}
+
+#judgetracker tbody tr th {
+    text-align: left;
+}
+
+#judgetracker tbody tr td {
+    text-align: right;
 }
 
 canvas {
