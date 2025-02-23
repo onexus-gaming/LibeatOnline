@@ -382,7 +382,7 @@ $d.onLoad(function(event) {
                     let A = Math.min((1-(musicTime - lastJudge.time)*5), 1)**2;
                     fontSize += 16 * A;
                 }
-                
+
                 const [R, G, B] = judgeColors[worstJudgeSinceComboStart];
 
                 laneRender.fillStyle = RGB(R, G, B);
